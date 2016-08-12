@@ -302,8 +302,10 @@
     compile &apos;com.squareup.retrofit2:converter-gson:2.1.0&apos;
     compile &apos;com.squareup.retrofit2:adapter-rxjava:2.1.0&apos;
 }
-</code></pre><h2 id="Rxjava-Retrofit统一Http的封装"><a href="#Rxjava-Retrofit统一Http的封装" class="headerlink" title="Rxjava+Retrofit统一Http的封装"></a>Rxjava+Retrofit统一Http的封装</h2><h3 id="HttpService"><a href="#HttpService" class="headerlink" title="HttpService"></a>HttpService</h3><p>Retrofit的配置<br>    public interface HttpService {<br>        /**</p>
-<pre><code>     * 测量多点之间的直线距离
+</code></pre><h2 id="Rxjava-Retrofit统一Http的封装"><a href="#Rxjava-Retrofit统一Http的封装" class="headerlink" title="Rxjava+Retrofit统一Http的封装"></a>Rxjava+Retrofit统一Http的封装</h2><h3 id="HttpService"><a href="#HttpService" class="headerlink" title="HttpService"></a>HttpService</h3><p>Retrofit的配置</p>
+<pre><code>public interface HttpService {
+    /**
+     * 测量多点之间的直线距离
      *
      * @param waypoints 需要测距的点的经纬度坐标；需传入两个或更多的点。两个点之间用 “; ”进行分割开，单个点的经纬度用“,”分隔开；例如： waypoints=118
      *                  .77147503233,32.054128923368;116.3521416286, 39.965780080447;116
@@ -318,8 +320,10 @@
                                                          @Field(&quot;ak&quot;) String ak,
                                                          @Field(&quot;output&quot;) String output);
 }
-</code></pre><h3 id="HttpUtil"><a href="#HttpUtil" class="headerlink" title="HttpUtil"></a>HttpUtil</h3><p>Retrofit和Rxjava进行结合 封装网络请求类<br>    public class HttpUtil {<br>        /**</p>
-<pre><code>     * 超时时间
+</code></pre><h3 id="HttpUtil"><a href="#HttpUtil" class="headerlink" title="HttpUtil"></a>HttpUtil</h3><p>Retrofit和Rxjava进行结合 封装网络请求类</p>
+<pre><code>public class HttpUtil {
+    /**
+     * 超时时间
      */
     private static final int DEFAULT_TIMEOUT = 10;
     /**
@@ -427,8 +431,10 @@
         }
     }
 }
-</code></pre><h3 id="LoggerInterceptor"><a href="#LoggerInterceptor" class="headerlink" title="LoggerInterceptor"></a>LoggerInterceptor</h3><p>日志打印和请求头的增加<br>    public class LoggerInterceptor implements Interceptor {</p>
-<pre><code>    @Override
+</code></pre><h3 id="LoggerInterceptor"><a href="#LoggerInterceptor" class="headerlink" title="LoggerInterceptor"></a>LoggerInterceptor</h3><p>日志打印和请求头的增加</p>
+<pre><code>public class LoggerInterceptor implements Interceptor {
+
+    @Override
     public Response intercept(Chain chain) throws IOException {
         Request originalRequest = chain.request().newBuilder().addHeader(&quot;version&quot;, &quot;1.0&quot;)
                 .addHeader(&quot;clientSort&quot;, &quot;android&quot;).addHeader(&quot;Charset&quot;, &quot;UTF-8&quot;)
@@ -514,8 +520,10 @@
         this.results = results;
     }
 }
-</code></pre><h3 id="HttpSubscriber"><a href="#HttpSubscriber" class="headerlink" title="HttpSubscriber"></a>HttpSubscriber</h3><p>Rxjava的回调<br>    public abstract class HttpSubscriber<t> extends Subscriber<t> {</t></t></p>
-<pre><code>    /**
+</code></pre><h3 id="HttpSubscriber"><a href="#HttpSubscriber" class="headerlink" title="HttpSubscriber"></a>HttpSubscriber</h3><p>Rxjava的回调</p>
+<pre><code>public abstract class HttpSubscriber&lt;T&gt; extends Subscriber&lt;T&gt; {
+
+    /**
      * 请求标示
      */
     private int tag;
@@ -654,8 +662,11 @@
         compositeSubscription.add(subscription);
     }
 }
-</code></pre><h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><h3 id="MainActivity"><a href="#MainActivity" class="headerlink" title="MainActivity"></a>MainActivity</h3><p>Activity中实现View<br>    public class MainActivity extends AppCompatActivity implements MainContract.IMainView {</p>
-<pre><code>    private MainPre mainPre;
+</code></pre><h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><h3 id="MainActivity"><a href="#MainActivity" class="headerlink" title="MainActivity"></a>MainActivity</h3><p>Activity中实现View</p>
+<pre><code>public class MainActivity extends AppCompatActivity implements MainContract.IMainView {
+
+
+    private MainPre mainPre;
     private android.widget.TextView getDistance;
     private android.widget.TextView firstToSecondDistance;
     private android.widget.TextView secondToThreeDistance;
@@ -723,8 +734,13 @@
         void setSecondPointToThreePointDistance(String distance);
     }
 }
-</code></pre><h3 id="MainPre"><a href="#MainPre" class="headerlink" title="MainPre"></a>MainPre</h3><p>presenter中绑定对应的View和解析的类型<br>    public class MainPre extends BasePresenter<maincontract.imainview, list<string="">&gt; {<br>        public MainPre(MainContract.IMainView view) {<br>            super(view);<br>        }</maincontract.imainview,></p>
-<pre><code>    @Override
+</code></pre><h3 id="MainPre"><a href="#MainPre" class="headerlink" title="MainPre"></a>MainPre</h3><p>presenter中绑定对应的View和解析的类型</p>
+<pre><code>public class MainPre extends BasePresenter&lt;MainContract.IMainView, List&lt;String&gt;&gt; {
+    public MainPre(MainContract.IMainView view) {
+        super(view);
+    }
+
+    @Override
     public void onSuccess(List&lt;String&gt; strings, int tag) {
         baseView.setFirstPointToSecondPointDistance(strings.get(0));
         baseView.setSecondPointToThreePointDistance(strings.get(1));
