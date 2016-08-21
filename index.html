@@ -944,6 +944,371 @@ ulimit -S -n 1024</code></p>
 
 
     
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/12/View的工作原理/" itemprop="url">
+                  View的工作原理
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-12T21:11:21+08:00" content="2016-07-12">
+              2016-07-12
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/12/View的工作原理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/12/View的工作原理/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/07/12/View的工作原理/" class="leancloud_visitors" data-flag-title="View的工作原理">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="初识ViewRoot和DecorView"><a href="#初识ViewRoot和DecorView" class="headerlink" title="初识ViewRoot和DecorView"></a>初识ViewRoot和DecorView</h2><p>View对应于ViewRootImpl类，它是连接WindowManager和DecorView的纽带，View的三大流程均是通过ViewRoot来完成的。在ActivityThread中，当Activity对象被创建完毕后，会将DecorView添加到Window中，同时会创建ViewRootImpl对象，并将ViewRootImpl对象和DecorView建立关联。<br>    root = new ViewRootImpl(view.getContext(),display);<br>    root.setView(view,wparams,panelParentView);<br>DecorView是顶级View，它是一个FrameLayout一般情况下内部包含一个LinearLayout的布局，上面就是actionbar，下面就是内容栏。内容栏的id为content<br>获取Content<br>    ViewGroup content = (ViewGroup)findViewById(android.R.id.content);</p>
+<h2 id="View的绘制流程"><a href="#View的绘制流程" class="headerlink" title="View的绘制流程"></a>View的绘制流程</h2><p>View的绘制流程是从ViewRoot的performTraversals方法开始，经过measure、layout和draw三个过程最终将View绘制出来，其中measure用来测量View的宽和高，layout用来确定View在父容器的位置，draw负责将View绘制在屏幕上。<br><img src="/images/DraggedImage.png" alt=""></p>
+<h2 id="View的Measure过程"><a href="#View的Measure过程" class="headerlink" title="View的Measure过程"></a>View的Measure过程</h2><blockquote>
+<p>measureChild（来测量子元素）</p>
+<h2 id="MeasureSpec"><a href="#MeasureSpec" class="headerlink" title="MeasureSpec"></a>MeasureSpec</h2><ul>
+<li>SpecMode<ol>
+<li><code>UNSPECIFIED</code><br> 父容器不对View有任何限制，要多大给多大，这种情况一般用于系统内部，表示一种测量状态</li>
+<li><code>EXACTLY</code><br> 父容器已经检测出View所需要的精确大小，这个时候View的最终大小就是SpecSize所指定的值</li>
+<li><code>AT_MOST</code><br> 父容器指定了一个可用大小的SpecSize,View的大小不能大于这个值，具体是什么值要看不同View的具体实现。它对应LayoutParams中的<code>wrap_content</code></li>
+</ol>
+</li>
+<li>普通View的创建规则<br><img src="/images/DraggedImage-1.png" alt=""><h3 id="Activity获取View的宽高方法"><a href="#Activity获取View的宽高方法" class="headerlink" title="Activity获取View的宽高方法"></a>Activity获取View的宽高方法</h3></li>
+</ul>
+<ol>
+<li>在onWindowFocusChanged中获取<br>   @Override<pre><code>public void onWindowFocusChanged(boolean hasFocus) {
+    super.onWindowFocusChanged(hasFocus);
+    if (hasFocus) {
+        //获取view宽高
+    }
+}
+</code></pre></li>
+<li>view.post</li>
+<li>ViewTreeObserver</li>
+<li>手动对View进行measure来获取宽高</li>
+</ol>
+<ul>
+<li>具体数值（dp/px）<br>  int width = View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY);<br>  int height = View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY);<br>  view.measure(width, height);<ul>
+<li><code>wrap_content</code><br>int width = View.MeasureSpec.makeMeasureSpec((1&lt;&lt;30) - 1, View.MeasureSpec.AT_MOST);<br>int height = View.MeasureSpec.makeMeasureSpec((1&lt;&lt;30) - 1, View.MeasureSpec.AT_MOST);<br>view.measure(width, height);<h2 id="View的layout过程"><a href="#View的layout过程" class="headerlink" title="View的layout过程"></a>View的layout过程</h2>如果不重写layout修改宽高,则layout的宽高和measure的是一样的。<h2 id="View的Draw过程"><a href="#View的Draw过程" class="headerlink" title="View的Draw过程"></a>View的Draw过程</h2></li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>绘制背景background.draw(canvas)</li>
+<li>绘制自己onDraw</li>
+<li>绘制clildren(dispatchDraw)</li>
+<li>绘制装饰（onDrawScrollBars）</li>
+<li>setWillNotDraw(控件本身不具备绘制功能时，可以开启这个设置来优化)</li>
+</ol>
+</blockquote>
+<h2 id="自定义View"><a href="#自定义View" class="headerlink" title="自定义View"></a>自定义View</h2><ul>
+<li>分类<ol>
+<li>继承View重写onDraw方法<br>需要自己的支持<code>wrap_content</code>,并且padding也要自己处理<br><strong>支持<code>wrap_content</code></strong><pre><code>@Override
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    //解决自定义View时wrap_content 等于 match_partent 情况
+    int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
+    int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
+    int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+    int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+    MeasureSpec.EXACTLY
+    if (widthSpecMode == MeasureSpec.AT_MOST &amp;&amp; heightSpecMode == MeasureSpec.AT_MOST) {
+        setMeasuredDimension(200, 200);
+    } else if (widthSpecMode == MeasureSpec.AT_MOST) {
+        setMeasuredDimension(200, heightSpecSize);
+    } else if (heightSpecMode == MeasureSpec.AT_MOST) {
+        setMeasuredDimension(widthSpecSize, 200);
+    }
+}
+</code></pre><strong>处理padding</strong><pre><code>@Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        int width = getWidth() - getPaddingLeft() - getPaddingRight();
+        int height = getHeight() - getPaddingTop() - getPaddingBottom();
+        int radius = Math.min(width, height);
+        canvas.drawCircle(getWidth() / 2, getHeight() / 2, radius / 2, mPaint);
+    } 
+</code></pre><ol>
+<li>继承ViewGroup派生特殊的Layout<br>主要实现自定义布局，需要合适的处理ViewGrop的测量、布局这两个过程，并同时处理子元素的测量和布局过程。</li>
+<li>继承特定的View如（TextView）</li>
+<li>继承特定的ViewGroup如(LinearLayout)<h3 id="自定义View须知"><a href="#自定义View须知" class="headerlink" title="自定义View须知"></a>自定义View须知</h3></li>
+</ol>
+</li>
+</ol>
+</li>
+</ul>
+<ol>
+<li>让View支持<code>wrap_content</code></li>
+<li>如果有必要，让你的View支持padding</li>
+<li>尽量不要在View中使用Handler</li>
+<li>View中如果有线程或者动画，需要及时停止，参考View#onDetachedFromWindow(View被remove或者包含View的Activity被销毁时)</li>
+<li>View带有滑动嵌套时，需要处理滑动冲突</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/08/View的事件体系/" itemprop="url">
+                  View的事件体系
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-08T20:10:41+08:00" content="2016-07-08">
+              2016-07-08
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/08/View的事件体系/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/08/View的事件体系/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/07/08/View的事件体系/" class="leancloud_visitors" data-flag-title="View的事件体系">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="View的事件体系"><a href="#View的事件体系" class="headerlink" title="View的事件体系"></a>View的事件体系</h1><h2 id="TouchSlop系统所能识别出的被认为是滑动的最小距离"><a href="#TouchSlop系统所能识别出的被认为是滑动的最小距离" class="headerlink" title="TouchSlop系统所能识别出的被认为是滑动的最小距离"></a>TouchSlop系统所能识别出的被认为是滑动的最小距离</h2><p>获取方法:<br>    ViewConfiguration.get(this).getScaledDoubleTapSlop();</p>
+<h2 id="VelocityTracker"><a href="#VelocityTracker" class="headerlink" title="VelocityTracker"></a>VelocityTracker</h2><p>监听控件滑动速度<br><strong>注意在View的onTouchEvent中获取才有效</strong><br>      @Override<br>        public boolean onTouchEvent(MotionEvent event) {<br>            VelocityTracker velocityTracker = VelocityTracker.obtain();<br>            velocityTracker.addMovement(event);<br>            if (event.getAction() == MotionEvent.ACTION_MOVE) {<br>                //获取速度前需要先计算速度 所需需要先设置计算单位<br>                velocityTracker.computeCurrentVelocity(100);<br>                //计算公式  速度 = (终点位置-起点位置) / 时间段<br>                int xVelocity = (int) velocityTracker.getXVelocity();<br>                int yVelocity = (int) velocityTracker.getYVelocity();<br>                Log.e(“xVelocity”, xVelocity + “”);<br>                Log.e(“yVelocity”, yVelocity + “”);<br>            } else if (event.getAction() == MotionEvent.ACTION_UP) {<br>                //回收内存<br>                velocityTracker.clear();<br>                velocityTracker.recycle();<br>            }</p>
+<pre><code>    return super.onTouchEvent(event);
+}
+</code></pre><h2 id="GestureDetector"><a href="#GestureDetector" class="headerlink" title="GestureDetector"></a>GestureDetector</h2><p><strong>注意</strong><br>部分回调方法需要view获取到焦点才行</p>
+<h2 id="Scroll"><a href="#Scroll" class="headerlink" title="Scroll"></a>Scroll</h2><ol>
+<li>scrollTo()方法是让View相对于初始的位置滚动某段距离</li>
+<li>scrollBy()方法则是让View相对于当前的位置滚动某段距离</li>
+<li>startScroll 方法<pre><code>/**
+     * @param startX   当前所在位置X
+     * @param startY   当前所在位置Y
+     * @param dx       从当前位置滑动多少X距离
+     * @param dy       从当前位置滑动多少Y距离
+     * @param duration 滑动距离的时间间隔
+     */
+    public void startScroll(int startX, int startY, int dx, int dy, int duration) {
+        throw new RuntimeException(&quot;Stub!&quot;);
+    }
+</code></pre><h2 id="事件分发"><a href="#事件分发" class="headerlink" title="事件分发"></a>事件分发</h2> public boolean dispatchTouchEvent(MotionEvent ev)<br>用来进行事件的分发，返回结果受到当前View的onTouchEvent和下级View的dispatchTouchEvent方法影响，表示是否消耗事件<br>  public boolean onInterceptTouchEvent(MotionEvent ev)<br>用来拦截事件，如果当前View拦截了某个事件，则在这次事件中该方法不会在调用<br> public boolean onTouchEvent(MotionEvent event)<br>处理事件，返回值为是否消耗事件<br><strong>三者关系</strong><br>  public boolean dispatchTouchEvent(MotionEvent ev) {<pre><code>    return super.dispatchTouchEvent(ev);
+    boolean consume = false;
+    if (onInterceptTouchEvent(ev)) {
+        consume = onTouchEvent(ev);
+    } else {
+        consume = child.dispatchTouchEvent(ev);
+    }
+    return consume;
+}
+</code></pre>onTouchListener 优先级比 onTouchEvent 要高<br><strong>结论</strong></li>
+<li>同一事件序列以down事件开始,中间含N个move,以up事件结束</li>
+<li>正常情况一个事件序列只能被一个View拦截</li>
+<li>一个View拦截了事件，那这一个事件序列都只能由他来处理</li>
+<li>某个View处理事件不消耗掉就会将事件重新交给父元素处理</li>
+<li>ViewGroup默认不拦截任何事件</li>
+<li>View 没有 onInterceptTouchEvent 方法，一旦有点击事件传递给它，那么它的onTouchEvent方法就会被调用</li>
+<li>View的onTouchEvent都是默认消耗事件的，除非他是不可点击的（clickable和longclickable同时为false）</li>
+<li>View的enable属性(设置View是否可按)不影响onTouchEvent的默认返回值。哪怕一个View是disable状态的只要它的clickable或者longClickable有一个为true那么他的onTouchEvent就返回true</li>
+<li>onClick会发生的前提是当前View是可点击的，并且它收到了down和up的事件</li>
+<li>事件传递是由外向内的，事件先传递给父元素，父元素分发给子View通过requestDisallowInterceptTouchEvent<br>方法可以在子元素中干预父元素分发过程<strong>DOWN</strong>除外。<h2 id="View的滑动冲突"><a href="#View的滑动冲突" class="headerlink" title="View的滑动冲突"></a>View的滑动冲突</h2><strong>内部拦截法</strong><br>重写子View的dispatchTouchEvent方法 利用 requestDisallowInterceptTouchEvent处理由父元素还是子元素消耗事件<br>@Override<pre><code>public boolean dispatchTouchEvent(MotionEvent ev) {
+    switch (ev.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            getParent().requestDisallowInterceptTouchEvent(true);
+            break;
+        case MotionEvent.ACTION_MOVE:
+            getParent().requestDisallowInterceptTouchEvent(false);
+            break;
+        case MotionEvent.ACTION_UP:
+            getParent().requestDisallowInterceptTouchEvent(true);
+            break;
+        default:
+            break;
+    }
+    return super.dispatchTouchEvent(ev);
+}
+</code></pre><strong>注意</strong><blockquote>
+<p>在父元素onInterceptTouchEvent方法中需要进行如下修改<br>不能拦截ACTION_DOWN 否则事件传递不到子View<br> @Override</p>
+<pre><code>public boolean onInterceptTouchEvent(MotionEvent ev) {
+    int action = ev.getAction();
+    if (action == MotionEvent.ACTION_DOWN) {
+        return false;
+    }
+    return true;
+}
+</code></pre></blockquote>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
   </section>
 
   
@@ -985,7 +1350,7 @@ ulimit -S -n 1024</code></p>
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">2</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -995,7 +1360,7 @@ ulimit -S -n 1024</code></p>
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

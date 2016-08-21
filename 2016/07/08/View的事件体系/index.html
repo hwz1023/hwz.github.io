@@ -1,0 +1,781 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android开发艺术探索笔记," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="View的事件体系TouchSlop系统所能识别出的被认为是滑动的最小距离获取方法:    ViewConfiguration.get(this).getScaledDoubleTapSlop();
+VelocityTracker监听控件滑动速度注意在View的onTouchEvent中获取才有效      @Override        public boolean onTouchEvent(">
+<meta property="og:type" content="article">
+<meta property="og:title" content="View的事件体系">
+<meta property="og:url" content="http://raindrops.club/2016/07/08/View的事件体系/index.html">
+<meta property="og:site_name" content="raindrops">
+<meta property="og:description" content="View的事件体系TouchSlop系统所能识别出的被认为是滑动的最小距离获取方法:    ViewConfiguration.get(this).getScaledDoubleTapSlop();
+VelocityTracker监听控件滑动速度注意在View的onTouchEvent中获取才有效      @Override        public boolean onTouchEvent(">
+<meta property="og:updated_time" content="2016-08-21T09:03:13.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="View的事件体系">
+<meta name="twitter:description" content="View的事件体系TouchSlop系统所能识别出的被认为是滑动的最小距离获取方法:    ViewConfiguration.get(this).getScaledDoubleTapSlop();
+VelocityTracker监听控件滑动速度注意在View的onTouchEvent中获取才有效      @Override        public boolean onTouchEvent(">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://raindrops.club/2016/07/08/View的事件体系/"/>
+
+  <title> View的事件体系 | raindrops </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">raindrops</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                View的事件体系
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-08T20:10:41+08:00" content="2016-07-08">
+              2016-07-08
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/08/View的事件体系/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/08/View的事件体系/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/07/08/View的事件体系/" class="leancloud_visitors" data-flag-title="View的事件体系">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="View的事件体系"><a href="#View的事件体系" class="headerlink" title="View的事件体系"></a>View的事件体系</h1><h2 id="TouchSlop系统所能识别出的被认为是滑动的最小距离"><a href="#TouchSlop系统所能识别出的被认为是滑动的最小距离" class="headerlink" title="TouchSlop系统所能识别出的被认为是滑动的最小距离"></a>TouchSlop系统所能识别出的被认为是滑动的最小距离</h2><p>获取方法:<br>    ViewConfiguration.get(this).getScaledDoubleTapSlop();</p>
+<h2 id="VelocityTracker"><a href="#VelocityTracker" class="headerlink" title="VelocityTracker"></a>VelocityTracker</h2><p>监听控件滑动速度<br><strong>注意在View的onTouchEvent中获取才有效</strong><br>      @Override<br>        public boolean onTouchEvent(MotionEvent event) {<br>            VelocityTracker velocityTracker = VelocityTracker.obtain();<br>            velocityTracker.addMovement(event);<br>            if (event.getAction() == MotionEvent.ACTION_MOVE) {<br>                //获取速度前需要先计算速度 所需需要先设置计算单位<br>                velocityTracker.computeCurrentVelocity(100);<br>                //计算公式  速度 = (终点位置-起点位置) / 时间段<br>                int xVelocity = (int) velocityTracker.getXVelocity();<br>                int yVelocity = (int) velocityTracker.getYVelocity();<br>                Log.e(“xVelocity”, xVelocity + “”);<br>                Log.e(“yVelocity”, yVelocity + “”);<br>            } else if (event.getAction() == MotionEvent.ACTION_UP) {<br>                //回收内存<br>                velocityTracker.clear();<br>                velocityTracker.recycle();<br>            }</p>
+<pre><code>    return super.onTouchEvent(event);
+}
+</code></pre><h2 id="GestureDetector"><a href="#GestureDetector" class="headerlink" title="GestureDetector"></a>GestureDetector</h2><p><strong>注意</strong><br>部分回调方法需要view获取到焦点才行</p>
+<h2 id="Scroll"><a href="#Scroll" class="headerlink" title="Scroll"></a>Scroll</h2><ol>
+<li>scrollTo()方法是让View相对于初始的位置滚动某段距离</li>
+<li>scrollBy()方法则是让View相对于当前的位置滚动某段距离</li>
+<li>startScroll 方法<pre><code>/**
+     * @param startX   当前所在位置X
+     * @param startY   当前所在位置Y
+     * @param dx       从当前位置滑动多少X距离
+     * @param dy       从当前位置滑动多少Y距离
+     * @param duration 滑动距离的时间间隔
+     */
+    public void startScroll(int startX, int startY, int dx, int dy, int duration) {
+        throw new RuntimeException(&quot;Stub!&quot;);
+    }
+</code></pre><h2 id="事件分发"><a href="#事件分发" class="headerlink" title="事件分发"></a>事件分发</h2> public boolean dispatchTouchEvent(MotionEvent ev)<br>用来进行事件的分发，返回结果受到当前View的onTouchEvent和下级View的dispatchTouchEvent方法影响，表示是否消耗事件<br>  public boolean onInterceptTouchEvent(MotionEvent ev)<br>用来拦截事件，如果当前View拦截了某个事件，则在这次事件中该方法不会在调用<br> public boolean onTouchEvent(MotionEvent event)<br>处理事件，返回值为是否消耗事件<br><strong>三者关系</strong><br>  public boolean dispatchTouchEvent(MotionEvent ev) {<pre><code>    return super.dispatchTouchEvent(ev);
+    boolean consume = false;
+    if (onInterceptTouchEvent(ev)) {
+        consume = onTouchEvent(ev);
+    } else {
+        consume = child.dispatchTouchEvent(ev);
+    }
+    return consume;
+}
+</code></pre>onTouchListener 优先级比 onTouchEvent 要高<br><strong>结论</strong></li>
+<li>同一事件序列以down事件开始,中间含N个move,以up事件结束</li>
+<li>正常情况一个事件序列只能被一个View拦截</li>
+<li>一个View拦截了事件，那这一个事件序列都只能由他来处理</li>
+<li>某个View处理事件不消耗掉就会将事件重新交给父元素处理</li>
+<li>ViewGroup默认不拦截任何事件</li>
+<li>View 没有 onInterceptTouchEvent 方法，一旦有点击事件传递给它，那么它的onTouchEvent方法就会被调用</li>
+<li>View的onTouchEvent都是默认消耗事件的，除非他是不可点击的（clickable和longclickable同时为false）</li>
+<li>View的enable属性(设置View是否可按)不影响onTouchEvent的默认返回值。哪怕一个View是disable状态的只要它的clickable或者longClickable有一个为true那么他的onTouchEvent就返回true</li>
+<li>onClick会发生的前提是当前View是可点击的，并且它收到了down和up的事件</li>
+<li>事件传递是由外向内的，事件先传递给父元素，父元素分发给子View通过requestDisallowInterceptTouchEvent<br>方法可以在子元素中干预父元素分发过程<strong>DOWN</strong>除外。<h2 id="View的滑动冲突"><a href="#View的滑动冲突" class="headerlink" title="View的滑动冲突"></a>View的滑动冲突</h2><strong>内部拦截法</strong><br>重写子View的dispatchTouchEvent方法 利用 requestDisallowInterceptTouchEvent处理由父元素还是子元素消耗事件<br>@Override<pre><code>public boolean dispatchTouchEvent(MotionEvent ev) {
+    switch (ev.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            getParent().requestDisallowInterceptTouchEvent(true);
+            break;
+        case MotionEvent.ACTION_MOVE:
+            getParent().requestDisallowInterceptTouchEvent(false);
+            break;
+        case MotionEvent.ACTION_UP:
+            getParent().requestDisallowInterceptTouchEvent(true);
+            break;
+        default:
+            break;
+    }
+    return super.dispatchTouchEvent(ev);
+}
+</code></pre><strong>注意</strong><blockquote>
+<p>在父元素onInterceptTouchEvent方法中需要进行如下修改<br>不能拦截ACTION_DOWN 否则事件传递不到子View<br> @Override</p>
+<pre><code>public boolean onInterceptTouchEvent(MotionEvent ev) {
+    int action = ev.getAction();
+    if (action == MotionEvent.ACTION_DOWN) {
+        return false;
+    }
+    return true;
+}
+</code></pre></blockquote>
+</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android开发艺术探索笔记/" rel="tag">#Android开发艺术探索笔记</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/12/View的工作原理/" rel="prev" title="View的工作原理">
+                View的工作原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/07/08/View的事件体系/"
+           data-title="View的事件体系" data-url="http://raindrops.club/2016/07/08/View的事件体系/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/lufei.jpeg"
+               alt="雨丶落下唯幕" />
+          <p class="site-author-name" itemprop="name">雨丶落下唯幕</p>
+          <p class="site-description motion-element" itemprop="description">要得到就必须要付出<br/>要付出你还要坚持<br/>如果真的很难，那就放弃<br/>放弃了就不要抱怨<br/>每个人都是通过自己的努力<br/>去决定自己生活的样子</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/hwz1023" target="_blank" title="github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  github
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#View的事件体系"><span class="nav-number">1.</span> <span class="nav-text">View的事件体系</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#TouchSlop系统所能识别出的被认为是滑动的最小距离"><span class="nav-number">1.1.</span> <span class="nav-text">TouchSlop系统所能识别出的被认为是滑动的最小距离</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VelocityTracker"><span class="nav-number">1.2.</span> <span class="nav-text">VelocityTracker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GestureDetector"><span class="nav-number">1.3.</span> <span class="nav-text">GestureDetector</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scroll"><span class="nav-number">1.4.</span> <span class="nav-text">Scroll</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事件分发"><span class="nav-number">1.5.</span> <span class="nav-text">事件分发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#View的滑动冲突"><span class="nav-number">1.6.</span> <span class="nav-text">View的滑动冲突</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">雨丶落下唯幕</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"raindrops"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("256FVJE2CJX2AzTYeFa9cERf-gzGzoHsz", "QG5NelUOmkxus5mCcSbjh5k6");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+</body>
+</html>

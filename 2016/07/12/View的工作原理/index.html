@@ -1,0 +1,802 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android开发艺术探索笔记," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="初识ViewRoot和DecorViewView对应于ViewRootImpl类，它是连接WindowManager和DecorView的纽带，View的三大流程均是通过ViewRoot来完成的。在ActivityThread中，当Activity对象被创建完毕后，会将DecorView添加到Window中，同时会创建ViewRootImpl对象，并将ViewRootImpl对象和DecorVie">
+<meta property="og:type" content="article">
+<meta property="og:title" content="View的工作原理">
+<meta property="og:url" content="http://raindrops.club/2016/07/12/View的工作原理/index.html">
+<meta property="og:site_name" content="raindrops">
+<meta property="og:description" content="初识ViewRoot和DecorViewView对应于ViewRootImpl类，它是连接WindowManager和DecorView的纽带，View的三大流程均是通过ViewRoot来完成的。在ActivityThread中，当Activity对象被创建完毕后，会将DecorView添加到Window中，同时会创建ViewRootImpl对象，并将ViewRootImpl对象和DecorVie">
+<meta property="og:image" content="http://raindrops.club/images/DraggedImage.png">
+<meta property="og:image" content="http://raindrops.club/images/DraggedImage-1.png">
+<meta property="og:updated_time" content="2016-08-21T09:05:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="View的工作原理">
+<meta name="twitter:description" content="初识ViewRoot和DecorViewView对应于ViewRootImpl类，它是连接WindowManager和DecorView的纽带，View的三大流程均是通过ViewRoot来完成的。在ActivityThread中，当Activity对象被创建完毕后，会将DecorView添加到Window中，同时会创建ViewRootImpl对象，并将ViewRootImpl对象和DecorVie">
+<meta name="twitter:image" content="http://raindrops.club/images/DraggedImage.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://raindrops.club/2016/07/12/View的工作原理/"/>
+
+  <title> View的工作原理 | raindrops </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">raindrops</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                View的工作原理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-12T21:11:21+08:00" content="2016-07-12">
+              2016-07-12
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/12/View的工作原理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/12/View的工作原理/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/07/12/View的工作原理/" class="leancloud_visitors" data-flag-title="View的工作原理">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="初识ViewRoot和DecorView"><a href="#初识ViewRoot和DecorView" class="headerlink" title="初识ViewRoot和DecorView"></a>初识ViewRoot和DecorView</h2><p>View对应于ViewRootImpl类，它是连接WindowManager和DecorView的纽带，View的三大流程均是通过ViewRoot来完成的。在ActivityThread中，当Activity对象被创建完毕后，会将DecorView添加到Window中，同时会创建ViewRootImpl对象，并将ViewRootImpl对象和DecorView建立关联。<br>    root = new ViewRootImpl(view.getContext(),display);<br>    root.setView(view,wparams,panelParentView);<br>DecorView是顶级View，它是一个FrameLayout一般情况下内部包含一个LinearLayout的布局，上面就是actionbar，下面就是内容栏。内容栏的id为content<br>获取Content<br>    ViewGroup content = (ViewGroup)findViewById(android.R.id.content);</p>
+<h2 id="View的绘制流程"><a href="#View的绘制流程" class="headerlink" title="View的绘制流程"></a>View的绘制流程</h2><p>View的绘制流程是从ViewRoot的performTraversals方法开始，经过measure、layout和draw三个过程最终将View绘制出来，其中measure用来测量View的宽和高，layout用来确定View在父容器的位置，draw负责将View绘制在屏幕上。<br><img src="/images/DraggedImage.png" alt=""></p>
+<h2 id="View的Measure过程"><a href="#View的Measure过程" class="headerlink" title="View的Measure过程"></a>View的Measure过程</h2><blockquote>
+<p>measureChild（来测量子元素）</p>
+<h2 id="MeasureSpec"><a href="#MeasureSpec" class="headerlink" title="MeasureSpec"></a>MeasureSpec</h2><ul>
+<li>SpecMode<ol>
+<li><code>UNSPECIFIED</code><br> 父容器不对View有任何限制，要多大给多大，这种情况一般用于系统内部，表示一种测量状态</li>
+<li><code>EXACTLY</code><br> 父容器已经检测出View所需要的精确大小，这个时候View的最终大小就是SpecSize所指定的值</li>
+<li><code>AT_MOST</code><br> 父容器指定了一个可用大小的SpecSize,View的大小不能大于这个值，具体是什么值要看不同View的具体实现。它对应LayoutParams中的<code>wrap_content</code></li>
+</ol>
+</li>
+<li>普通View的创建规则<br><img src="/images/DraggedImage-1.png" alt=""><h3 id="Activity获取View的宽高方法"><a href="#Activity获取View的宽高方法" class="headerlink" title="Activity获取View的宽高方法"></a>Activity获取View的宽高方法</h3></li>
+</ul>
+<ol>
+<li>在onWindowFocusChanged中获取<br>   @Override<pre><code>public void onWindowFocusChanged(boolean hasFocus) {
+    super.onWindowFocusChanged(hasFocus);
+    if (hasFocus) {
+        //获取view宽高
+    }
+}
+</code></pre></li>
+<li>view.post</li>
+<li>ViewTreeObserver</li>
+<li>手动对View进行measure来获取宽高</li>
+</ol>
+<ul>
+<li>具体数值（dp/px）<br>  int width = View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY);<br>  int height = View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY);<br>  view.measure(width, height);<ul>
+<li><code>wrap_content</code><br>int width = View.MeasureSpec.makeMeasureSpec((1&lt;&lt;30) - 1, View.MeasureSpec.AT_MOST);<br>int height = View.MeasureSpec.makeMeasureSpec((1&lt;&lt;30) - 1, View.MeasureSpec.AT_MOST);<br>view.measure(width, height);<h2 id="View的layout过程"><a href="#View的layout过程" class="headerlink" title="View的layout过程"></a>View的layout过程</h2>如果不重写layout修改宽高,则layout的宽高和measure的是一样的。<h2 id="View的Draw过程"><a href="#View的Draw过程" class="headerlink" title="View的Draw过程"></a>View的Draw过程</h2></li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>绘制背景background.draw(canvas)</li>
+<li>绘制自己onDraw</li>
+<li>绘制clildren(dispatchDraw)</li>
+<li>绘制装饰（onDrawScrollBars）</li>
+<li>setWillNotDraw(控件本身不具备绘制功能时，可以开启这个设置来优化)</li>
+</ol>
+</blockquote>
+<h2 id="自定义View"><a href="#自定义View" class="headerlink" title="自定义View"></a>自定义View</h2><ul>
+<li>分类<ol>
+<li>继承View重写onDraw方法<br>需要自己的支持<code>wrap_content</code>,并且padding也要自己处理<br><strong>支持<code>wrap_content</code></strong><pre><code>@Override
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    //解决自定义View时wrap_content 等于 match_partent 情况
+    int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
+    int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
+    int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+    int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+    MeasureSpec.EXACTLY
+    if (widthSpecMode == MeasureSpec.AT_MOST &amp;&amp; heightSpecMode == MeasureSpec.AT_MOST) {
+        setMeasuredDimension(200, 200);
+    } else if (widthSpecMode == MeasureSpec.AT_MOST) {
+        setMeasuredDimension(200, heightSpecSize);
+    } else if (heightSpecMode == MeasureSpec.AT_MOST) {
+        setMeasuredDimension(widthSpecSize, 200);
+    }
+}
+</code></pre><strong>处理padding</strong><pre><code>@Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        int width = getWidth() - getPaddingLeft() - getPaddingRight();
+        int height = getHeight() - getPaddingTop() - getPaddingBottom();
+        int radius = Math.min(width, height);
+        canvas.drawCircle(getWidth() / 2, getHeight() / 2, radius / 2, mPaint);
+    } 
+</code></pre><ol>
+<li>继承ViewGroup派生特殊的Layout<br>主要实现自定义布局，需要合适的处理ViewGrop的测量、布局这两个过程，并同时处理子元素的测量和布局过程。</li>
+<li>继承特定的View如（TextView）</li>
+<li>继承特定的ViewGroup如(LinearLayout)<h3 id="自定义View须知"><a href="#自定义View须知" class="headerlink" title="自定义View须知"></a>自定义View须知</h3></li>
+</ol>
+</li>
+</ol>
+</li>
+</ul>
+<ol>
+<li>让View支持<code>wrap_content</code></li>
+<li>如果有必要，让你的View支持padding</li>
+<li>尽量不要在View中使用Handler</li>
+<li>View中如果有线程或者动画，需要及时停止，参考View#onDetachedFromWindow(View被remove或者包含View的Activity被销毁时)</li>
+<li>View带有滑动嵌套时，需要处理滑动冲突</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android开发艺术探索笔记/" rel="tag">#Android开发艺术探索笔记</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/08/View的事件体系/" rel="next" title="View的事件体系">
+                <i class="fa fa-chevron-left"></i> View的事件体系
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/17/Mac-0S-X下编译Android 6.0源码/" rel="prev" title="Mac OS X下编译Android 6.0源码">
+                Mac OS X下编译Android 6.0源码 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/07/12/View的工作原理/"
+           data-title="View的工作原理" data-url="http://raindrops.club/2016/07/12/View的工作原理/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/lufei.jpeg"
+               alt="雨丶落下唯幕" />
+          <p class="site-author-name" itemprop="name">雨丶落下唯幕</p>
+          <p class="site-description motion-element" itemprop="description">要得到就必须要付出<br/>要付出你还要坚持<br/>如果真的很难，那就放弃<br/>放弃了就不要抱怨<br/>每个人都是通过自己的努力<br/>去决定自己生活的样子</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/hwz1023" target="_blank" title="github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  github
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#初识ViewRoot和DecorView"><span class="nav-number">1.</span> <span class="nav-text">初识ViewRoot和DecorView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#View的绘制流程"><span class="nav-number">2.</span> <span class="nav-text">View的绘制流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#View的Measure过程"><span class="nav-number">3.</span> <span class="nav-text">View的Measure过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MeasureSpec"><span class="nav-number">4.</span> <span class="nav-text">MeasureSpec</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity获取View的宽高方法"><span class="nav-number">4.1.</span> <span class="nav-text">Activity获取View的宽高方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#View的layout过程"><span class="nav-number">5.</span> <span class="nav-text">View的layout过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#View的Draw过程"><span class="nav-number">6.</span> <span class="nav-text">View的Draw过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义View"><span class="nav-number">7.</span> <span class="nav-text">自定义View</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义View须知"><span class="nav-number">7.1.</span> <span class="nav-text">自定义View须知</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">雨丶落下唯幕</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"raindrops"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("256FVJE2CJX2AzTYeFa9cERf-gzGzoHsz", "QG5NelUOmkxus5mCcSbjh5k6");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+</body>
+</html>
